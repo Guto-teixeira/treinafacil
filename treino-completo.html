@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ficha KineDoc — Prévia com gifs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;900&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f1014;--card:#16181f;--card2:#1b1e26;--line:#272b35;--ink:#f3f4f6;--muted:#8b909c;--faint:#565b67;--accent:#ff6a1a;--accent-soft:rgba(255,106,26,.14);--marker:linear-gradient(100deg,#ff7a24,#ff9a3d);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Inter",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;padding:18px 14px 60px;background-image:radial-gradient(120% 55% at 50% -10%,rgba(255,106,26,.10),transparent 60%)}
+.sheet{max-width:900px;margin:0 auto}
+.demo{display:flex;gap:8px;align-items:center;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.03em;color:#ffd0ad;background:rgba(255,106,26,.10);border:1px solid rgba(255,106,26,.30);border-radius:8px;padding:8px 12px;margin-bottom:16px}
+.brand{display:flex;align-items:center;gap:9px;font-family:"Archivo";font-weight:900;letter-spacing:.14em;text-transform:uppercase;font-size:13px;color:var(--muted)}
+.brand__dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+.brand b{color:var(--ink)}
+.hero{padding:18px 0 14px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.hero__title{font-family:"Archivo";font-weight:900;font-size:clamp(34px,10vw,60px);line-height:.9;letter-spacing:-.02em;text-transform:uppercase;margin:14px 0 2px;position:relative;display:inline-block}
+.hero__title::after{content:"";position:absolute;left:-4px;right:-4px;bottom:.12em;height:.30em;background:var(--marker);z-index:-1;transform:rotate(-.6deg);border-radius:3px;opacity:.9}
+.hero__sub{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted);margin-top:10px}
+.hero__sub b{color:var(--accent);font-weight:600}
+.group{margin-bottom:22px;animation:rise .5s cubic-bezier(.2,.7,.3,1) both;animation-delay:calc(var(--i)*55ms)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.group__head{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.group__tab{font-family:"Archivo";font-weight:900;font-size:12px;color:var(--accent);background:var(--accent-soft);border:1px solid rgba(255,106,26,.35);border-radius:7px;padding:5px 8px;line-height:1}
+.group__name{font-family:"Archivo";font-weight:700;font-size:16px;text-transform:uppercase;letter-spacing:.04em;flex:1}
+.group__count{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--faint)}
+.cards{display:grid;grid-template-columns:1fr;gap:10px}
+.card{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:10px}
+.thumb{flex:none;width:88px;height:88px;border-radius:10px;overflow:hidden;background:#fff;border:1px solid var(--line);padding:0;cursor:pointer;position:relative;display:block}
+.thumb img{width:100%;height:100%;object-fit:contain;display:block}
+.thumb--none,.thumb--fail{background:var(--card2);cursor:default}
+.thumb--none span,.thumb--fail::after{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.thumb--fail::after{content:"sem gif"}
+.thumb--fail img{display:none}
+.card__body{flex:1;min-width:0}
+.card__name{font-weight:600;font-size:15.5px;margin-bottom:8px}
+.card__meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.badge{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;color:#160c02;background:var(--marker);padding:4px 10px;border-radius:5px;transform:rotate(-.8deg)}
+.carga{display:flex;align-items:center;gap:7px}
+.carga label{font-family:"IBM Plex Mono",monospace;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--faint)}
+.carga input{width:78px;background:var(--card2);border:1px solid var(--line);border-radius:7px;color:var(--ink);font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;padding:5px 8px;outline:none}
+.carga input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.foot{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--faint)}
+/* lightbox */
+.lb{position:fixed;inset:0;background:rgba(6,7,10,.86);display:none;align-items:center;justify-content:center;padding:24px;z-index:50}
+.lb.open{display:flex}
+.lb__box{max-width:520px;width:100%;background:#fff;border-radius:16px;overflow:hidden}
+.lb__box img{width:100%;display:block;background:#fff}
+.lb__cap{font-family:"Archivo";font-weight:700;color:#16181f;padding:12px 16px;font-size:15px;background:#fff}
+@media (min-width:720px){.cards{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:reduce){.group{animation:none}}
+</style>
+</head>
+<body>
+<div class="sheet">
+  <div class="brand"><span class="brand__dot"></span>Kine<b>Doc</b> · Biblioteca de treinos</div>
+  <header class="hero">
+    <h1 class="hero__title">Treino<br>Completo</h1>
+    <p class="hero__sub">Corpo inteiro · <b>3 séries</b> · <b>12–15 reps</b> · 7 grupos · 33 exercícios · toque na gif pra ampliar</p>
+  </header>
+
+<section class="group" style="--i:0">
+  <div class="group__head"><span class="group__tab">MI</span><h2 class="group__name">Membros Inferiores</h2><span class="group__count">9 exercícios</span></div>
+  <div class="cards">
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Pernas/Leg%20Press.gif" data-name="Leg Press 45º" aria-label="Ver Leg Press 45º"><img loading="lazy" alt="Leg Press 45º" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Leg Press 45º</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Leg Press 45º"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Pernas/Agachamento.gif" data-name="Agachamento Livre" aria-label="Ver Agachamento Livre"><img loading="lazy" alt="Agachamento Livre" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Agachamento Livre</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Agachamento Livre"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Pernas/Cadeira%20extensora.gif" data-name="Extensão de Pernas" aria-label="Ver Extensão de Pernas"><img loading="lazy" alt="Extensão de Pernas" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Extensão de Pernas</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Extensão de Pernas"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Pernas/Mesa%20flexora.gif" data-name="Flexão de Pernas" aria-label="Ver Flexão de Pernas"><img loading="lazy" alt="Flexão de Pernas" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Flexão de Pernas</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Flexão de Pernas"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Pernas/M%C3%A1quina%20de%20Adu%C3%A7%C3%A3o%20de%20Quadril.gif" data-name="Adução de Coxa" aria-label="Ver Adução de Coxa"><img loading="lazy" alt="Adução de Coxa" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Adução de Coxa</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Adução de Coxa"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Gl%C3%BAteos/M%C3%A1quina%20de%20Abdu%C3%A7%C3%A3o%20de%20Quadril.gif" data-name="Abdução de Coxa" aria-label="Ver Abdução de Coxa"><img loading="lazy" alt="Abdução de Coxa" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Abdução de Coxa</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Abdução de Coxa"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Pernas/Stiff%20com%20barra.gif" data-name="Stiff" aria-label="Ver Stiff"><img loading="lazy" alt="Stiff" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Stiff</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Stiff"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Pernas/Agachamento%20Sum%C3%B4%20com%20Barra.gif" data-name="Sumô" aria-label="Ver Sumô"><img loading="lazy" alt="Sumô" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Sumô</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Sumô"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Panturrilhas/Eleva%C3%A7%C3%A3o%20de%20Panturrilha%20Sentado%20com%20Barra.gif" data-name="Panturrilha Sentada" aria-label="Ver Panturrilha Sentada"><img loading="lazy" alt="Panturrilha Sentada" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Panturrilha Sentada</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Panturrilha Sentada"></span>
+    </div>
+  </div>
+</article>
+  </div>
+</section>
+
+<section class="group" style="--i:1">
+  <div class="group__head"><span class="group__tab">PE</span><h2 class="group__name">Peitoral</h2><span class="group__count">5 exercícios</span></div>
+  <div class="cards">
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Peitoral/Supino.gif" data-name="Supino Reto Barra" aria-label="Ver Supino Reto Barra"><img loading="lazy" alt="Supino Reto Barra" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Supino Reto Barra</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Supino Reto Barra"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Peitoral/Supino%20Inclinado%20com%20Halteres.gif" data-name="Supino Inclinado Halteres" aria-label="Ver Supino Inclinado Halteres"><img loading="lazy" alt="Supino Inclinado Halteres" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Supino Inclinado Halteres</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Supino Inclinado Halteres"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Peitoral/Supino%20na%20m%C3%A1quina.gif" data-name="Supino Máquina" aria-label="Ver Supino Máquina"><img loading="lazy" alt="Supino Máquina" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Supino Máquina</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Supino Máquina"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Peitoral/Voador%20no%20pec%20deck.gif" data-name="Peck Deck" aria-label="Ver Peck Deck"><img loading="lazy" alt="Peck Deck" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Peck Deck</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Peck Deck"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Peitoral/Pullover%20com%20haltere.gif" data-name="Pull Over" aria-label="Ver Pull Over"><img loading="lazy" alt="Pull Over" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Pull Over</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Pull Over"></span>
+    </div>
+  </div>
+</article>
+  </div>
+</section>
+
+<section class="group" style="--i:2">
+  <div class="group__head"><span class="group__tab">CO</span><h2 class="group__name">Costas</h2><span class="group__count">5 exercícios</span></div>
+  <div class="cards">
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Costas/Puxada%20Alta.gif" data-name="Puxada Frente" aria-label="Ver Puxada Frente"><img loading="lazy" alt="Puxada Frente" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Puxada Frente</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Puxada Frente"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Costas/Remada%20Sentada%20com%20Cabo.gif" data-name="Remada Baixa" aria-label="Ver Remada Baixa"><img loading="lazy" alt="Remada Baixa" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Remada Baixa</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Remada Baixa"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Costas/Remada%20frontal%20com%20alavanca.gif" data-name="Remada Articulada" aria-label="Ver Remada Articulada"><img loading="lazy" alt="Remada Articulada" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Remada Articulada</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Remada Articulada"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Ombros/Voador%20invertido.gif" data-name="Crucifixo Inverso" aria-label="Ver Crucifixo Inverso"><img loading="lazy" alt="Crucifixo Inverso" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Crucifixo Inverso</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Crucifixo Inverso"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Costas/Puxada%20na%20Polia%20Alta%20com%20Pegada%20Fechada.gif" data-name="Puxador Fechado" aria-label="Ver Puxador Fechado"><img loading="lazy" alt="Puxador Fechado" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Puxador Fechado</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Puxador Fechado"></span>
+    </div>
+  </div>
+</article>
+  </div>
+</section>
+
+<section class="group" style="--i:3">
+  <div class="group__head"><span class="group__tab">BI</span><h2 class="group__name">Bíceps</h2><span class="group__count">3 exercícios</span></div>
+  <div class="cards">
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/B%C3%ADceps/Rosca%20Scott%20com%20Barra%20W.gif" data-name="Rosca Scott" aria-label="Ver Rosca Scott"><img loading="lazy" alt="Rosca Scott" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Rosca Scott</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Rosca Scott"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/B%C3%ADceps/Rosca%20alternada%20com%20halteres%20sentado.gif" data-name="Rosca Alternada" aria-label="Ver Rosca Alternada"><img loading="lazy" alt="Rosca Alternada" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Rosca Alternada</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Rosca Alternada"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/B%C3%ADceps/Rosca%20no%20Cabo.gif" data-name="Rosca na Polia" aria-label="Ver Rosca na Polia"><img loading="lazy" alt="Rosca na Polia" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Rosca na Polia</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Rosca na Polia"></span>
+    </div>
+  </div>
+</article>
+  </div>
+</section>
+
+<section class="group" style="--i:4">
+  <div class="group__head"><span class="group__tab">TR</span><h2 class="group__name">Tríceps</h2><span class="group__count">3 exercícios</span></div>
+  <div class="cards">
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Tr%C3%ADceps/Tr%C3%ADceps%20pulley%20corda.gif" data-name="Tríceps Corda" aria-label="Ver Tríceps Corda"><img loading="lazy" alt="Tríceps Corda" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Tríceps Corda</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Tríceps Corda"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Tr%C3%ADceps/Tr%C3%ADceps%20pulley%20pegada%20invertida.gif" data-name="Tríceps Supinado" aria-label="Ver Tríceps Supinado"><img loading="lazy" alt="Tríceps Supinado" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Tríceps Supinado</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Tríceps Supinado"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Tr%C3%ADceps/Tr%C3%ADceps%20Franc%C3%AAs%20com%20Halteres.gif" data-name="Tríceps Francês" aria-label="Ver Tríceps Francês"><img loading="lazy" alt="Tríceps Francês" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Tríceps Francês</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Tríceps Francês"></span>
+    </div>
+  </div>
+</article>
+  </div>
+</section>
+
+<section class="group" style="--i:5">
+  <div class="group__head"><span class="group__tab">OM</span><h2 class="group__name">Ombro</h2><span class="group__count">5 exercícios</span></div>
+  <div class="cards">
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Ombros/Desenvolvimento%20de%20Ombro%20no%20Banco%20com%20Halteres.gif" data-name="Desenvolvimento com Halteres" aria-label="Ver Desenvolvimento com Halteres"><img loading="lazy" alt="Desenvolvimento com Halteres" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Desenvolvimento com Halteres</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Desenvolvimento com Halteres"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Ombros/Desenvolvimento%20de%20ombro%20na%20m%C3%A1quina.gif" data-name="Desenvolvimento Articulado" aria-label="Ver Desenvolvimento Articulado"><img loading="lazy" alt="Desenvolvimento Articulado" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Desenvolvimento Articulado</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Desenvolvimento Articulado"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Ombros/Eleva%C3%A7%C3%A3o%20lateral%20de%20bra%C3%A7os%20com%20halteres.gif" data-name="Elevação Lateral" aria-label="Ver Elevação Lateral"><img loading="lazy" alt="Elevação Lateral" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Elevação Lateral</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Elevação Lateral"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Ombros/Eleva%C3%A7%C3%A3o%20frontal%20com%20halteres.gif" data-name="Elevação Frontal" aria-label="Ver Elevação Frontal"><img loading="lazy" alt="Elevação Frontal" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Elevação Frontal</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Elevação Frontal"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <button class="thumb" data-path="musculacao/500%20Gifs%20de%20Muscula%C3%A7%C3%A3o/Trap%C3%A9zio/Encolhimento%20com%20Halteres.gif" data-name="Encolhimento" aria-label="Ver Encolhimento"><img loading="lazy" alt="Encolhimento" onerror="this.closest('.thumb').classList.add('thumb--fail')"></button>
+  <div class="card__body">
+    <h3 class="card__name">Encolhimento</h3>
+    <div class="card__meta"><span class="badge">3 × 12-15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Encolhimento"></span>
+    </div>
+  </div>
+</article>
+  </div>
+</section>
+
+<section class="group" style="--i:6">
+  <div class="group__head"><span class="group__tab">AB</span><h2 class="group__name">Abdômen</h2><span class="group__count">3 exercícios</span></div>
+  <div class="cards">
+<article class="card">
+  <div class="thumb thumb--none" aria-hidden="true"><span>sem gif</span></div>
+  <div class="card__body">
+    <h3 class="card__name">Abdominal Supra no Chão</h3>
+    <div class="card__meta"><span class="badge">3 × 15</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Abdominal Supra no Chão"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <div class="thumb thumb--none" aria-hidden="true"><span>sem gif</span></div>
+  <div class="card__body">
+    <h3 class="card__name">Prancha Ventral</h3>
+    <div class="card__meta"><span class="badge">10 × máx</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Prancha Ventral"></span>
+    </div>
+  </div>
+</article>
+<article class="card">
+  <div class="thumb thumb--none" aria-hidden="true"><span>sem gif</span></div>
+  <div class="card__body">
+    <h3 class="card__name">Abdominal na Paralela</h3>
+    <div class="card__meta"><span class="badge">3 × 12</span>
+      <span class="carga"><label>Carga</label><input inputmode="decimal" placeholder="kg" aria-label="Carga Abdominal na Paralela"></span>
+    </div>
+  </div>
+</article>
+  </div>
+</section>
+
+  <div class="foot">KineDoc · DataRoad Tecnologia — ficha de demonstração</div>
+</div>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true">
+  <div class="lb__box"><img id="lbimg" alt=""><div class="lb__cap" id="lbcap"></div></div>
+</div>
+
+<script>
+// >>> SE AS GIFS NAO APARECEREM, troque SOMENTE esta linha pela URL correta do seu servidor <<<
+const GIF_BASE = "gifs/";  // caminho relativo: funciona quando o arquivo esta na pasta app/ do servidor
+
+document.querySelectorAll('.thumb[data-path]').forEach(function(t){
+  var img=t.querySelector('img');
+  img.src = GIF_BASE + t.dataset.path;
+  t.addEventListener('click',function(){
+    if(t.classList.contains('thumb--fail'))return;
+    document.getElementById('lbimg').src = GIF_BASE + t.dataset.path;
+    document.getElementById('lbcap').textContent = t.dataset.name;
+    document.getElementById('lb').classList.add('open');
+  });
+});
+document.getElementById('lb').addEventListener('click',function(){this.classList.remove('open');});
+</script>
+</body>
+</html>
