@@ -88,7 +88,7 @@ function enviarEmailFicha(string $nome, string $email, string $token): void
         return;
     }
 
-    $link = APP_URL . '/ficha.php?t=' . $token;
+    $link = APP_URL . '/ficha.php?token=' . $token;
 
     $mail = new PHPMailer(true);
     try {
