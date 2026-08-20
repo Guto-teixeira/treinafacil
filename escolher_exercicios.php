@@ -21,7 +21,7 @@ $stmt = $pdo->prepare("
 $stmt->execute([$token]);
 $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$pedido || $pedido['mp_status'] !== 'approved') { header('Location: index.php'); exit; }
+if (!$pedido || !in_array($pedido['mp_status'], ['approved', 'demo'], true)) { header('Location: index.php'); exit; }
 if (empty($pedido['escolhas_aluno'])) { header('Location: selecao.php?token=' . urlencode($token)); exit; }
 
 // Lê perfil

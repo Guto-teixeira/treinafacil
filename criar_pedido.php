@@ -14,6 +14,7 @@ $produtos_disponiveis = [
 ];
 
 $produto = $_GET['produto'] ?? '';
+$is_demo = defined('DEMO_KEY') && hash_equals(DEMO_KEY, $_GET['demo'] ?? '');
 
 if (empty($_SESSION['quiz']) || !isset($produtos_disponiveis[$produto])) {
     header('Location: index.php');
@@ -49,7 +50,7 @@ try {
     // 2) Pedido
     $token_ficha = bin2hex(random_bytes(32));
     $stmt = $pdo->prepare('INSERT INTO pedidos (cliente_id, mp_status, valor, tipo_produto, token_ficha) VALUES (?, ?, ?, ?, ?)');
-    $stmt->execute([$cliente_id, 'pending', $valor, $produto, $token_ficha]);
+    $stmt->execute([$cliente_id, $is_demo ? 'demo' : 'pending', $valor, $produto, $token_ficha]);
     $pedido_id = $pdo->lastInsertId();
 
     // 3) Ficha — perfil do quiz em JSON; escolhas_aluno fica NULL até o pós-pagamento (selecao.php)
@@ -65,6 +66,12 @@ try {
 
     $stmt = $pdo->prepare('INSERT INTO fichas (pedido_id, perfil, tipo_produto, dias_semana) VALUES (?, ?, ?, ?)');
     $stmt->execute([$pedido_id, $perfil_json, $produto, $quiz['dias_semana'] ?? 3]);
+
+    // 3.1) Chave demo: pula o Mercado Pago inteiramente e vai direto pra ficha
+    if ($is_demo) {
+        header('Location: ficha.php?token=' . urlencode($token_ficha));
+        exit;
+    }
 
     // 4) Chama a API do Mercado Pago para gerar o Pix
     $body = [

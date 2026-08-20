@@ -15,7 +15,7 @@ $stmt = $pdo->prepare("SELECT p.*, f.id as ficha_id, f.perfil, f.dias_semana, f.
 $stmt->execute([$token]);
 $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if (!$pedido || $pedido['mp_status'] !== 'approved') { header('Location: index.php'); exit; }
+if (!$pedido || !in_array($pedido['mp_status'], ['approved', 'demo'], true)) { header('Location: index.php'); exit; }
 
 // Se já tem escolhas salvas, redireciona direto para a ficha
 if (!empty($pedido['escolhas_aluno'])) {

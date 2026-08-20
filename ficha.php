@@ -21,7 +21,7 @@ $stmt->execute([$token]);
 $pedido = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$pedido)                            { http_response_code(404); die('<h1>Link inválido</h1>'); }
-if ($pedido['mp_status'] !== 'approved') { http_response_code(402); die('<h1>Pagamento pendente</h1>'); }
+if (!$pedido || !in_array($pedido['mp_status'], ['approved', 'demo'], true)) { header('Location: index.php'); exit; }
 if (empty($pedido['escolhas_aluno']))    { header('Location: selecao.php?token=' . urlencode($token)); exit; }
 
 $conteudo_salvo = json_decode($pedido['conteudo'] ?? '{}', true) ?? [];
