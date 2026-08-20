@@ -58,11 +58,12 @@ $passo = max(0, min((int)($_GET['passo'] ?? 0), count($todos_grupos) - 1));
 $grupo_atual = $todos_grupos[$passo] ?? '';
 $total_passos = count($todos_grupos);
 
-// Busca exercícios do grupo e nível atual
+// Busca exercícios do grupo e nível atual — só do pool do produto comprado (musculação x calistenia)
+$filtro_produto = getFiltroProduto($pedido['tipo_produto'] ?? 'musculacao');
 $stmt2 = $pdo->prepare("
     SELECT id, nome, gif_pasta, gif_arquivo, instrucoes, nivel
     FROM exercicios
-    WHERE grupo_muscular = ? AND nivel = ? AND ativo = 1
+    WHERE grupo_muscular = ? AND nivel = ? AND ativo = 1 AND ($filtro_produto)
     ORDER BY id ASC
 ");
 $stmt2->execute([$grupo_atual, $nivel_aluno]);
@@ -70,7 +71,7 @@ $exercicios = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
 // Se não tem exercícios desse nível, pega todos ativos do grupo
 if (empty($exercicios)) {
-    $stmt3 = $pdo->prepare("SELECT id, nome, gif_pasta, gif_arquivo, instrucoes, nivel FROM exercicios WHERE grupo_muscular = ? AND ativo = 1 ORDER BY id ASC");
+  $stmt3 = $pdo->prepare("SELECT id, nome, gif_pasta, gif_arquivo, instrucoes, nivel FROM exercicios WHERE grupo_muscular = ? AND ativo = 1 AND ($filtro_produto) ORDER BY id ASC");
     $stmt3->execute([$grupo_atual]);
     $exercicios = $stmt3->fetchAll(PDO::FETCH_ASSOC);
 }

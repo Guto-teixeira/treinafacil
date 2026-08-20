@@ -17,7 +17,7 @@ function getDivisaoSugerida(int $dias, string $sexo = 'M'): array
         'B' => ['nome' => 'Treino B — Costas + Bíceps',    'grupos' => ['Costas', 'Bíceps']],
         'C' => ['nome' => 'Treino C — Pernas completo',    'grupos' => ['Pernas', 'Panturrilhas']],
         'D' => ['nome' => 'Treino D — Ombros + Trapézio',  'grupos' => ['Ombros', 'Trapézio']],
-        'E' => ['nome' => 'Treino E — Glúteos + Core',     'grupos' => ['Glúteos', 'Eretores da espinha', 'Antebraços']],
+        'E' => ['nome' => 'Treino E — Glúteos + Core',     'grupos' => ['Glúteos', 'Eretores da espinha']],
     ];
 
     // Ajuste feminino: prioriza glúteos e pernas
@@ -26,7 +26,7 @@ function getDivisaoSugerida(int $dias, string $sexo = 'M'): array
         $base['B'] = ['nome' => 'Treino B — Costas + Bíceps',    'grupos' => ['Costas', 'Bíceps']];
         $base['C'] = ['nome' => 'Treino C — Peitoral + Tríceps', 'grupos' => ['Peitoral', 'Tríceps']];
         $base['D'] = ['nome' => 'Treino D — Pernas + Panturrilhas', 'grupos' => ['Pernas', 'Panturrilhas']];
-        $base['E'] = ['nome' => 'Treino E — Ombros + Core',      'grupos' => ['Ombros', 'Trapézio', 'Antebraços']];
+        $base['E'] = ['nome' => 'Treino E — Ombros + Core',      'grupos' => ['Ombros', 'Trapézio']];
     }
 
     // 2 dias: Full Body dividido em superior e inferior
@@ -50,28 +50,31 @@ function getDivisaoSugerida(int $dias, string $sexo = 'M'): array
         $resultado[] = array_merge(['letra' => $letra], $base[$letra]);
     }
 
-    // 6 dias: adiciona treino F livre
-    if ($dias >= 6) {
-        $resultado[] = [
-            'letra'  => 'F',
-            'nome'   => 'Treino F — Livre (escolha seu favorito)',
-            'grupos' => ['Cardio Academia'],
-            'livre'  => true,
-        ];
-    }
-
     return $resultado;
 }
 
 /**
- * Grupos disponíveis no banco
+ * Filtro SQL que separa o pool de exercícios por produto (musculação x calistenia),
+ * já que ambos reaproveitam os mesmos nomes de grupo_muscular e só se distinguem por gif_pasta.
+ * Alongamento nunca entra nesse pool — é bônus à parte.
  */
-function getGruposDisponiveis(PDO $pdo): array
+function getFiltroProduto(string $tipo_produto): string
 {
+    return $tipo_produto === 'calistenia'
+        ? "gif_pasta = 'calistenia'"
+        : "gif_pasta NOT IN ('calistenia','alongamento')";
+}
+
+/**
+ * Grupos disponíveis no banco, já filtrados pelo produto do pedido
+ */
+function getGruposDisponiveis(PDO $pdo, string $tipo_produto = 'musculacao'): array
+{
+    $filtro = getFiltroProduto($tipo_produto);
     $stmt = $pdo->query("
         SELECT DISTINCT grupo_muscular
         FROM exercicios
-        WHERE ativo = 1
+        WHERE ativo = 1 AND ($filtro)
         ORDER BY grupo_muscular ASC
     ");
     return $stmt->fetchAll(PDO::FETCH_COLUMN);

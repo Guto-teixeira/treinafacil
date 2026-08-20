@@ -30,7 +30,7 @@ $dias   = (int)($perfil['dias_semana'] ?? 3);
 $nivel  = $perfil['nivel'] ?? 'Iniciante';
 
 // Grupos disponíveis no banco
-$grupos_disponiveis = getGruposDisponiveis($pdo);
+$grupos_disponiveis = getGruposDisponiveis($pdo, $pedido['tipo_produto'] ?? 'musculacao');
 
 // Divisão sugerida
 $divisao_sugerida = getDivisaoSugerida($dias, $sexo);
